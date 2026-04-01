@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, request
 from models import db, Order, OrderItem, CartItem, Product
 from middleware import get_logged_in_user
 import datetime
+import stripe
+
+stripe.api_key = "sk_test_51TGkTiKBvJOuRgQkPBHK74Tlsc2Zd6VIR2dzr2LcFB0uatMRY9TiowH8LKYreyVkc3ZwL17cx3Wc7Auogn0yhvzx00Y0SLrYEK"
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -28,6 +31,14 @@ def place_order():
             "quantity": item.quantity,
             "price": product.price
         })
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=int(total_price * 100),
+            currency="usd",
+            metadata={"user_id": str(user["user_id"])}
+        )
+    except Exception as e:
+        return jsonify({"error": "Payment failed", "details": str(e)}), 400
     order = Order(
         user_id=user["user_id"],
         total_price=total_price,
@@ -52,7 +63,8 @@ def place_order():
         "message": "Order placed",
         "order_id": order.id,
         "total_price": order.total_price,
-        "status": order.status
+        "status": order.status,
+        "payment_client_secret": payment_intent.client_secret
     }), 201
 
 @orders_bp.route("/orders", methods=["GET"])
