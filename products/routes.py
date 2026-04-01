@@ -17,6 +17,15 @@ def product_to_dict(p):
 
 @products_bp.route("/products", methods=["GET"])
 def get_products():
+    """
+    Get all products
+    ---
+    tags:
+      - Products
+    responses:
+      200:
+        description: A list of all products
+    """
     products = Product.query.all()
     result = []
     for p in products:
@@ -26,6 +35,39 @@ def get_products():
 
 @products_bp.route("/products", methods=["POST"])
 def add_product():
+    """
+    Create a new product
+    ---
+    tags:
+      - Products
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: iPhone
+            price:
+              type: number
+              example: 999.99
+            stock:
+              type: integer
+              example: 50
+            category:
+              type: string
+              example: electronics
+            description:
+              type: string
+              example: Latest smartphone
+    responses:
+      201:
+        description: Product created
+      400:
+        description: Invalid input
+    """
     data = request.json
     if not data:
         return jsonify({"error": "No data provided"}), 400

@@ -4,12 +4,20 @@ from products.routes import products_bp
 from auth.routes import auth_bp, bcrypt
 from cart.routes import cart_bp
 from orders.routes import orders_bp
+from flasgger import Swagger
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ecommerce.db"
+app.config["SWAGGER"] = {
+    "title": "E-Commerce API",
+    "description": "A RESTful e-commerce API with products, cart, orders, and Stripe payments",
+    "version": "1.0.0"
+}
 
 db.init_app(app)
 bcrypt.init_app(app)
+
+swagger = Swagger(app)
 
 app.register_blueprint(products_bp)
 app.register_blueprint(auth_bp)
